@@ -14,18 +14,27 @@ using Microsoft.Win32;
 using System.IO;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
+using Microsoft.VisualBasic;
+using WpfToDoList.Views;
 
 namespace WpfToDoList.ViewModels
 {
     class MainViewModel : INotifyPropertyChanged
     {
-        public MainViewModel()
+
+
+        public MainViewModel(string startFile)
         {
-            InputBox = "";
-            AddTextCommand = new RelayCommand(AddText);
+
+            LoadStartFile(startFile);
             DeleteCommand = new RelayCommand(Delete);
             SaveFileCommand = new RelayCommand(SaveFile);
+            SaveFileAsCommand = new RelayCommand(SaveFileAs);
             LoadFileComamnd = new RelayCommand(LoadFile);
+            SetStartFileComamnd = new RelayCommand(SetStartFile);
+            ExitCommand = new RelayCommand(Exit);
+            AddTaskCommand = new RelayCommand(AddTask);
+            EditTaskCommand = new RelayCommand(EditTask);
         }
 
 
@@ -34,28 +43,6 @@ namespace WpfToDoList.ViewModels
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private string _inputDescriptionBox;
-        public string InputDescriptionBox
-        {
-            get { return _inputDescriptionBox; }
-            set 
-            { 
-                _inputDescriptionBox = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string _inputBox;
-        public string InputBox
-        {
-            get { return _inputBox; }
-            set
-            {
-                _inputBox = value;
-                OnPropertyChanged();
-            }
         }
 
         private string _outputDescriptionBox;
@@ -68,18 +55,22 @@ namespace WpfToDoList.ViewModels
                 OnPropertyChanged();
             }
         }
-
-        private ObservableCollection<MainModel> _taskList = new ObservableCollection<MainModel>();
+        
+        public static ObservableCollection<MainModel> _taskList = new ObservableCollection<MainModel>();
         public ObservableCollection<MainModel> TaskList
         {
             get 
             {
                 return _taskList;
             }
-            set { _taskList = value; }
+            set { 
+                _taskList = value;
+                OnPropertyChanged();
+            }
         }
 
-        private MainModel _selectedTask;
+
+        public static MainModel _selectedTask;
         public MainModel SelectedTask
         {
             get { return _selectedTask; }
@@ -91,9 +82,8 @@ namespace WpfToDoList.ViewModels
                     OutputDescriptionBox = _selectedTask.Description;
                 }catch (Exception ex)
                 {
-
+                    
                 }
-                
                 OnPropertyChanged();
             }
         }
@@ -114,24 +104,8 @@ namespace WpfToDoList.ViewModels
             }
         }
 
-        public ICommand AddTextCommand { get; set; }
-        private void AddText(Object obj)
-        {
-            if (InputBox.Length > 0)
-            {
-                TaskList.Add(new MainModel { Task = InputBox, Description = InputDescriptionBox });
-                InputBox = "";
-                InputDescriptionBox = "";
-            }
-            else
-            {
-                MessageBox.Show("Należy dodać zadanie", "Błąd", MessageBoxButton.OK);
-            }
-            
-        }
-
-        public ICommand SaveFileCommand { get; set; }
-        private void SaveFile(object obj)
+        public ICommand SaveFileAsCommand { get; set; }
+        private void SaveFileAs(object obj)
         {
             
             var stringBuilder = new StringBuilder();
@@ -145,10 +119,34 @@ namespace WpfToDoList.ViewModels
             if(result.Length>0)
             {
                 SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.DefaultExt = ".txt";
                 if (saveFileDialog.ShowDialog() == true)
                 {
                     File.WriteAllText(saveFileDialog.FileName, result);
+                    CurrentFile = saveFileDialog.FileName;
                 }
+            }
+            else
+            {
+                MessageBox.Show("Brak zdań do zapisu!", "Błąd", MessageBoxButton.OK);
+            }
+        }
+
+        public ICommand SaveFileCommand { get; set; }
+        private void SaveFile(object obj)
+        {
+
+            var stringBuilder = new StringBuilder();
+            foreach (var _task in _taskList)
+            {
+                stringBuilder.Append(_task.Task);
+                stringBuilder.Append(";");
+                stringBuilder.AppendLine(_task.Description);
+            }
+            string result = stringBuilder.ToString();
+            if (result.Length > 0)
+            {
+                System.IO.File.WriteAllText(CurrentFile, result);
             }
             else
             {
@@ -179,12 +177,97 @@ namespace WpfToDoList.ViewModels
                             data = fileContent.Split(';');
                             TaskList.Add(new MainModel { Task = data[0], Description = data[1] }); 
                         }
+                        
+                    }
+                    CurrentFile = filePath;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Błąd", MessageBoxButton.OK);
+                }
+            }
+        }
+
+        public ICommand SetStartFileComamnd {  get; set; }
+
+        private void SetStartFile(Object obj)
+        {
+            string filePath;
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.InitialDirectory = "C:\\Users\\Adam Iwaszkiewicz\\Desktop";
+            if (openFileDialog.ShowDialog() == true)
+            {
+                filePath = openFileDialog.FileName;
+            }
+            System.IO.File.WriteAllText(System.IO.Path.GetFullPath(@"..\..\..\") + "\\Resources\\conf.txt", filePath);
+        }
+
+        private void LoadStartFile(string file)
+        {
+            if(file != null)
+            {
+                CurrentFile = file;
+                file = file.Replace("'\'", "\\");
+                String fileContent;
+                string[] data;
+                try
+                {
+                    var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read);
+                    using (StreamReader sr = new StreamReader(fileStream))
+                    {
+                        while ((fileContent = sr.ReadLine()) != null)
+                        {
+                            data = fileContent.Split(';');
+                            TaskList.Add(new MainModel { Task = data[0], Description = data[1] });
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, "Błąd", MessageBoxButton.OK);
                 }
+            }
+            
+        }
+
+        public ICommand ExitCommand { get; set; }
+        private void Exit(Object obj)
+        {
+            System.Windows.Application.Current.Shutdown();
+        }
+
+        public ICommand AddTaskCommand { get; set; }
+
+        private void AddTask(Object obj)
+        {
+            AddDialogView myWindow = new AddDialogView();
+            myWindow.Show();
+        }
+
+        public ICommand EditTaskCommand { get; set; }
+
+        private void EditTask(Object obj)
+        {
+            if(_selectedTask != null)
+            {
+                EditDialogView myWindow = new EditDialogView();
+                myWindow.Show();
+            }
+            else
+            {
+
+            }
+            
+        }
+
+        private string _currentFile;
+        public string CurrentFile
+        {
+            get { return _currentFile; }
+            set
+            {
+                _currentFile = value;
+                OnPropertyChanged();
             }
         }
 

@@ -10,31 +10,53 @@
 
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_File">
-                <MenuItem Header="_Save" Command="{Binding SaveFileCommand}"/>
-                <MenuItem Header="_Load" Command="{Binding LoadFileComamnd}"/>
+            <MenuItem Header="_Plik">
+                <MenuItem Header="_Zapisz" Command="{Binding SaveFileCommand}"/>
+                <MenuItem Header="_Zapisz jako" Command="{Binding SaveFileAsCommand}"/>
+                <MenuItem Header="_Otwórz" Command="{Binding LoadFileComamnd}"/>
+                <Separator/>
+                <MenuItem Header="_Zamknij" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Zadania">
+                <MenuItem Header="_Dodaj" Command="{Binding AddTaskCommand}"/>
+                <MenuItem Header="_Edytuj"/>
+                <MenuItem Header="_Usuń" Command="{Binding DeleteCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Opcje">
+                <MenuItem Header="_Ustaw plik domyślny" Command="{Binding SetStartFileComamnd}"/>
             </MenuItem>
         </Menu>
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-            <Label>Zadanie</Label>
-            <TextBox Margin="2" MinWidth="100" Width="auto" Height="25" Text="{Binding InputBox}"/>
 
-            <Label>Opis Zadania</Label>
-            <TextBox Margin="2" MinWidth="300" Width="auto" Height="25" Text="{Binding InputDescriptionBox}"/>
-
-            <Button Margin="2" MinWidth="100" Width="auto" Height="25" Command="{Binding AddTextCommand}">Dodaj</Button>
-
-        </StackPanel>
-            
         
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-            <Label>Zadanie</Label>
-            <ListBox  Margin="2" MinWidth="100" MinHeight="25" Width="auto" ItemsSource="{Binding TaskList}" SelectedItem="{Binding SelectedTask}" VerticalAlignment="Top"/>
+        
+        <DockPanel >
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="104"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="29"/>
+                    <RowDefinition Height="29"/>
+                    <RowDefinition Height="29"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="25"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Grid.Column="0">Zadania</Label>
+                <ListBox Grid.Row="1" Grid.Column="0" Grid.RowSpan="4" Margin="2" MinWidth="100" MinHeight="25" Width="auto" ItemsSource="{Binding TaskList}" SelectedItem="{Binding SelectedTask}" VerticalAlignment="Top"/>
 
-            <Label>Opis Zadania</Label>
-            <TextBox Margin="2" MinWidth="300" MinHeight="25" IsReadOnly="True" Text="{Binding OutputDescriptionBox}" />
-            <Button  Margin="2" MinWidth="100" Width="auto" Height="25" Command="{Binding DeleteCommand}" VerticalAlignment="Top">Usuń</Button>
-        </StackPanel>
+                <Label Grid.Row="0" Grid.Column="1">Opis Zadania</Label>
+                <TextBox Grid.Row="1" Grid.Column="1" Grid.RowSpan="4" Margin="2" MinWidth="300" MinHeight="25" IsReadOnly="True" Text="{Binding OutputDescriptionBox}" />
+                <Button Grid.Row="1" Grid.Column="2" Margin="2" MinWidth="100" Width="auto" Height="25" Command="{Binding AddTaskCommand}" VerticalAlignment="Top">Dodaj</Button>
+                <Button Grid.Row="2" Grid.Column="2" Margin="2" MinWidth="100" Width="auto" Height="25" Command="{Binding EditTaskCommand}" VerticalAlignment="Top">Edytuj</Button>
+                <Button Grid.Row="3" Grid.Column="2" Margin="2" MinWidth="100" Width="auto" Height="25" Command="{Binding DeleteCommand}" VerticalAlignment="Top">Usuń</Button>
+                <Label Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="3" Content="{Binding CurrentFile}"></Label>
+            </Grid>
+        </DockPanel>
+        
+
         
         
     </DockPanel>
