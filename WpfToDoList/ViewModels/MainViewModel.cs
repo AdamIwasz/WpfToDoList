@@ -163,7 +163,7 @@ namespace WpfToDoList.ViewModels
             string[] data;
             String filePath;
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.InitialDirectory = "C:\\Users\\Adam Iwaszkiewicz\\Desktop";
+            openFileDialog.InitialDirectory = "C:\\Users\\"+System.Security.Principal.WindowsIdentity.GetCurrent().Name+"\\Desktop";
             if (openFileDialog.ShowDialog() == true)
             {
                 try
@@ -194,12 +194,14 @@ namespace WpfToDoList.ViewModels
         {
             string filePath;
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.InitialDirectory = "C:\\Users\\Adam Iwaszkiewicz\\Desktop";
+            openFileDialog.InitialDirectory = "C:\\Users\\" + System.Security.Principal.WindowsIdentity.GetCurrent().Name + "\\Desktop";
             if (openFileDialog.ShowDialog() == true)
             {
                 filePath = openFileDialog.FileName;
             }
-            System.IO.File.WriteAllText(System.IO.Path.GetFullPath(@"..\..\..\") + "\\Resources\\conf.txt", filePath);
+            System.IO.File.WriteAllText(Directory.GetCurrentDirectory() + "\\conf.txt", filePath);
+
+
         }
 
         private void LoadStartFile(string file)

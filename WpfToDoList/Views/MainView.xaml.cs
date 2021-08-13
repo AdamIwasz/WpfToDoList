@@ -31,7 +31,8 @@ namespace WpfToDoList.Views
 
         private string ReadConfFile()
         {
-            string filePath = System.IO.Path.GetFullPath(@"..\..\..\") + "\\Resources\\conf.txt";
+            //string filePath = System.IO.Path.GetFullPath(@"..\..\..\") + "\\Resources\\conf.txt";
+            string filePath = Directory.GetCurrentDirectory() + "\\conf.txt";
             string fileContent;
             try
             {
